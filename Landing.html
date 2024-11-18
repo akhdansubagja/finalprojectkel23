@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bootstrap</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <style>
+    /* Custom styles */
+    body {
+      font-family: "Kanit", serif;
+      font-weight: 200;
+      font-style: normal;
+    }
+    .navbar-brand img {
+      height: 50px;
+    }
+    .hero-section {
+      position: relative;
+      background-image: url('Bus.jpg'); /* Replace with actual image path */
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 100px 20px;
+    }
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Black overlay with 50% opacity */
+      z-index: 1;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .hero-content h1 {
+      font-weight: bold;
+    }
+    .btn-custom {
+      font-weight: bold;
+      margin-right: 15px;
+      border-radius: 50px;
+    }
+    .about-section {
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .about-section h2 {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .about-section p {
+      font-size: 1.1em;
+      line-height: 1.6;
+      color: #666;
+    }
+    .reviews-section {
+      background-color: #f9f9f9;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .reviews-section h2 {
+      font-weight: bold;
+      margin-bottom: 40px;
+    }
+    .review-card {
+      border: none;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .review-card img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+    }
+    .review-card h5 {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    .review-card p {
+      font-size: 0.95em;
+      color: #555;
+    }
+    .footer {
+      background-color: #395a7f;
+      color: #ddd;
+    }
+    .footer .social-icons a {
+      color: #ddd;
+      margin: 0 10px;
+      font-size: 1.2em;
+    }
+    .footer .social-icons a:hover {
+      color: #f9a825;
+    }
+    .slideshow-section {
+    padding: 60px 20px;
+    text-align: center;
+    }
+    .carousel-caption h5 {
+    background-color: rgba(0, 0, 0, 0.7); /* Background hitam dengan opasitas 70% */
+    padding: 10px;
+    border-radius: 5px;
+    }
+    
+    #foodCarousel {
+    max-width: 600px; /* Sesuaikan lebar carousel */
+    margin: 0 auto;   /* Untuk membuatnya terpusat */
+    }
+    #foodCarousel .carousel-item img {
+    height: 300px; /* Sesuaikan tinggi carousel */
+    object-fit: cover; /* Agar gambar menyesuaikan ukuran tanpa terdistorsi */
+    width: 100%; /* Pastikan gambar memenuhi lebar carousel */
+    }
+     /* Tambahkan efek animasi fade */
+  .carousel-item {
+    transition: opacity 1s ease-in-out;
+  }
+
+  .carousel-item-next,
+  .carousel-item-prev,
+  .carousel-item.active {
+    display: block;
+    opacity: 0;
+  }
+
+  .carousel-item.active {
+    opacity: 1;
+  }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">
+      <img src="LBus.png" alt="Zein Persada Logo"> Zein Persada
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Product</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">FAQ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Why wait for the ride of your life? <br> Travel with Zein Persada today!
+      <p>Download the Zein Persada bus transportation app now on:</p>
+    <a href="login.html" class="btn btn-custom btn-danger">Pesan Sekarang</a>
+    <a href="login.html" class="btn btn-custom btn-outline-light">Booking Untuk Nanti</a>
+  </div>
+</section>
+  <!-- About Us Section -->
+  <section class="about-section">
+    <div class="container">
+      <h2>About Us</h2>
+      <p>
+        At Zein Persada, we redefine the way you travel by connecting you to the most reliable and comfortable bus rides. We understand the importance of safe, timely, and enjoyable journeys, and we work tirelessly to ensure our passengers reach their destinations with ease and comfort.
+      </p>
+      <p>
+        Join Zein Persada on a journey of convenience and discover a whole new way to travel. With our easy-to-use booking system and excellent customer service, your next adventure is just a ride away!
+      </p>
+    </div>
+  </section>
+  <!-- Customer Reviews Section -->
+  <section class="reviews-section">
+    <div class="container">
+      <h2>Customer Reviews</h2>
+      <div class="row">
+        <!-- Review 1 -->
+        <div class="col-md-4">
+          <div class="review-card p-4">
+            <img src="boy.png" alt="Customer 1">
+            <h5>Jane Doe</h5>
+            <p>"The food arrived quickly and was absolutely delicious. Zein Persada has become my go-to service transport app!"</p>
+          </div>
+        </div>
+        <!-- Review 2 -->
+        <div class="col-md-4">
+          <div class="review-card p-4">
+            <img src="boy (1).png" alt="Customer 2">
+            <h5>John Smith</h5>
+            <p>"I love the variety of options available on Zein Persada. It's so easy to use and the service is top-notch."</p>
+          </div>
+        </div>
+        <!-- Review 3 -->
+        <div class="col-md-4">
+          <div class="review-card p-4">
+            <img src="girl.png" alt="Customer 3">
+            <h5>Emily Brown</h5>
+            <p>"Great experience! The app is user-friendly and the service quality is fantastic. Highly recommended."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Slideshow Section -->
+<section class="slideshow-section">
+  <div id="foodCarousel" class="carousel slide carousel-fade" data-ride="carousel">
+    <div class="carousel-inner">
+      <!-- Slide 1 -->
+      <div class="carousel-item active">
+        <img src="Mini.jpeg" class="d-block w-100" alt="Burger"> <!-- Ganti dengan path gambar sebenarnya -->
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Mini Van</h5>
+        </div>
+      </div>
+      <!-- Slide 2 -->
+      <div class="carousel-item">
+        <img src="Bus.jpg" class="d-block w-100" alt="Pizza"> <!-- Ganti dengan path gambar sebenarnya -->
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Bus</h5>
+        </div>
+      </div>
+      <!-- Slide 3 -->
+      <div class="carousel-item">
+        <img src="BsTr.jpg" class="d-block w-100" alt="Pasta"> <!-- Ganti dengan path gambar sebenarnya -->
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Travel</h5>
+        </div>
+      </div>
+    </div>
+    <!-- Carousel Controls -->
+    <a class="carousel-control-prev" href="#foodCarousel" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#foodCarousel" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+</section>
+  <!-- Footer Section -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h5>About Us</h5>
+          <p>Zein Persada is your go-to food delivery app for delicious meals at your doorstep. We are committed to providing the best service and food quality.</p>
+        </div>
+        <div class="col-md-4">
+          <h5>Quick Links</h5>
+          <ul class="list-unstyled">
+            <li><a href="#" style="color: #ddd;">Home</a></li>
+            <li><a href="#" style="color: #ddd;">Product</a></li>
+            <li><a href="#" style="color: #ddd;">FAQ</a></li>
+            <li><a href="#" style="color: #ddd;">Contact</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h5>Follow Us</h5>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr style="border-color: #555;">
+      <p>&copy; 2024 Zein Persada. All rights reserved.</p>
+    </div>
+  </footer>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>  
+</body>
+</html>
