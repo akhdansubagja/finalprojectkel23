@@ -1,19 +1,21 @@
 <?php
-// Koneksi ke database
-$host = "localhost"; // Ganti dengan host database Anda
-$user = "root"; // Ganti dengan username database Anda
-$password = ""; // Ganti dengan password database Anda
-$database = "user_management"; // Ganti dengan nama database Anda
+// koneksi.php
 
-// Membuat koneksi
-$conn = new mysqli($host, $user, $password, $database);
+$host = 'localhost';   // Host where MySQL is running
+$username = 'root';    // MySQL username
+$password = '';        // MySQL password (empty for default XAMPP)
+$database = 'db_paket';// Name of the database you want to connect to
+$port = 3306;          // Custom MySQL port (as you mentioned 3306)
 
-// Memeriksa koneksi
+// Create connection with specified port
+$conn = new mysqli($host, $username, $password, $database, $port);
+
+// Check for connection errors
 if ($conn->connect_error) {
-    die("Koneksi gagal: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
 }
-echo "Koneksi berhasil";
 
-// Tutup koneksi (jika tidak diperlukan lagi)
-$conn->close();
+// Remove echo for "Connected successfully"
+// Use this for debugging only if needed:
+// echo "Connected successfully";
 ?>
