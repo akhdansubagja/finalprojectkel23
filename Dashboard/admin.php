@@ -2,21 +2,28 @@
 session_start();
 
 // Cek apakah pengguna sudah login
-if (!isset($_SESSION['user_id'])) { // Ganti 'user_id' dengan nama variabel sesi yang Anda gunakan
-    header("Location: ../login.html"); // Arahkan ke halaman login jika belum login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.html");
     exit();
 }
 
 require_once '../backend/koneksi.php';
+require_once '../backend/notification.php'; // Tambahkan ini untuk mengakses fungsi notifikasi
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Atur header untuk mencegah caching
-header("Cache-Control: no-cache, no-store, must-revalidate"); // Untuk HTTP 1.1
-header("Pragma: no-cache"); // Untuk HTTP 1.0
-header("Expires: 0"); // Untuk semua
+// Ambil semua notifikasi
+$notifications = getNotifications();
+
+// Hitung jumlah notifikasi yang belum dibaca
+$unread_count = 0;
+foreach ($notifications as $notification) {
+    if ($notification['is_read'] == 0) {
+        $unread_count++;
+    }
+}
 
 // Query untuk mengambil data dari tabel paket
 $sql = "SELECT id_paket, nama_paket, tujuan, durasi_hari, harga, status_paket, foto, deskripsi FROM paket";
@@ -29,6 +36,15 @@ $result = $conn->query($sql);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Paket Tour Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* CSS Kustom untuk Responsivitas */
+        body {
+            overflow-x: hidden; /* Mencegah scroll horizontal */
+        }
+        .card {
+            margin-bottom: 20px; /* Jarak antar kartu */
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -38,12 +54,21 @@ $result = $conn->query($sql);
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link active" href="#">Daftar Paket</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="kelola_pesanan.php">Pesanan Paket</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="notifikasi.php">Notifikasi
+                        <?php if ($unread_count > 0): ?>
+                            <span class="badge bg-danger"><?php echo $unread_count; ?></span>
+                        <?php endif; ?>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="../backend/logout.php">Logout</a>
@@ -53,37 +78,8 @@ $result = $conn->query($sql);
     </div>
 </nav>    
 
-<div class="container my-5">
+<div class="container-fluid my-5">
     <h1 class="text-center mb-4">Daftar Paket Tour</h1>
-    <!-- Notifikasi -->
-    <?php if (isset($_GET['status'])): ?>
-        <div class="alert alert-<?php echo ($_GET['status'] == 'success' || $_GET['status'] == 'edit_success' || $_GET['status'] == 'delete_success') ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
-            <?php
-            if ($_GET['status'] == 'success') {
-                echo 'Paket berhasil ditambahkan.';
-            } elseif ($_GET['status'] == 'edit_success') {
-                echo 'Paket berhasil diedit.';
-            } elseif ($_GET['status'] == 'delete_success') {
-                echo 'Paket berhasil dihapus.';
-            } elseif ($_GET['status'] == 'error') {
-                echo 'Terjadi kesalahan saat memproses permintaan.';
-            } elseif ($_GET['status'] == 'invalid') {
-                echo 'ID paket tidak valid.';
-            }
-            ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <script>
-            // Menghapus parameter status dari URL setelah 3 detik
-            setTimeout(function() {
-                const url = new URL(window.location);
-                url.searchParams.delete('status');
-                window.history.replaceState({}, document.title, url);
-            }, 1000); // Ubah 3000 menjadi waktu dalam milidetik sesuai kebutuhan
-        </script>
-    <?php endif; ?>
-
-
 
     <!-- Tambah Paket -->
     <div class="mb-4 text-end">
@@ -95,13 +91,13 @@ $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
                 echo '
                 <div class="col-md-4">
-                    <div class="card mb-4">';
+                    <div class="card">';
 
                 // Cek jika foto ada dan valid
                 if (!empty($row['foto']) && file_exists("../uploads/" . $row['foto'])) {
-                    echo '<img src="../uploads/' . htmlspecialchars($row['foto']) . '" class="card-img-top" alt="Foto Paket">';
+                    echo '<img src="../uploads/' . htmlspecialchars($row['foto']) . '" class="card-img-top img-fluid" alt="Foto Paket">';
                 } else {
-                    echo '<img src="../uploads/default.jpg" class="card-img-top" alt="Foto Default">';
+                    echo '<img src="../uploads/default.jpg" class="card-img-top img-fluid" alt="Foto Default">';
                 }
 
                 echo '

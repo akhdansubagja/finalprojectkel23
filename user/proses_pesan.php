@@ -1,5 +1,6 @@
 <?php
 include '../backend/koneksi.php';
+require_once '../backend/notification.php'; // Tambahkan ini untuk mengakses fungsi notifikasi
 session_start(); // Memulai sesi
 
 // Cek apakah user sudah login
@@ -36,6 +37,9 @@ if ($result_harga->num_rows > 0) {
     $stmt_insert->bind_param("iississ", $id_paket, $user_id, $nama_pemesan, $email, $jumlah_peserta, $harga_total, $tanggal_perjalanan);
     
     if ($stmt_insert->execute()) {
+        // Tambahkan notifikasi setelah pemesanan berhasil
+        addNotification("Pesanan baru telah diterima untuk paket ID: " . htmlspecialchars($id_paket) . " oleh " . htmlspecialchars($nama_pemesan));
+
         // Redirect ke halaman pembayaran
         header("Location: pembayaran.php?id_pesanan=" . $stmt_insert->insert_id); // Mengalihkan ke halaman pembayaran
         exit();

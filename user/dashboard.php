@@ -51,7 +51,7 @@ $result = $conn->query($sql);
                     <a class="nav-link" href="history.php">Riwayat Pesanan</a> <!-- Link ke halaman riwayat pesanan -->
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../Backend/logout.php">Logout</a>
+                    <a class="nav-link" href="../backend/logout.php">Logout</a>
                 </li>
             </ul>
         </div>
