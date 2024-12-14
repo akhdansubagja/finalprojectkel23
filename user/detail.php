@@ -120,7 +120,7 @@ $current_date = date('Y-m-d');
 
                     <div class="mb-3">
                         <label for="jumlah_peserta" class="form-label">Jumlah Peserta</label>
-                        <input type="number" class="form-control" id="jumlah_peserta" name="jumlah_peserta" min="1" value="1" required>
+                        <input type="number" class="form-control" id="jumlah_peserta" name="jumlah_peserta" min="20" value="20" required>
                     </div>
                     <div class="mb-3">
                         <label for="tanggal_perjalanan" class="form-label">Tanggal Perjalanan</label>
