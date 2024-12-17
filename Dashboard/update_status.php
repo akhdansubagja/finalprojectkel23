@@ -22,7 +22,7 @@ if (isset($_GET['id'])) {
     $id_pesanan = $_GET['id'];
 
     // Ambil detail pesanan biasa
-    $sql = "SELECT * FROM pesanan WHERE id = ?";
+    $sql = "SELECT * FROM pesanan WHERE id_pesanan = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id_pesanan);
     $stmt->execute();
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $status_pesanan = $_POST['status_pesanan'];
 
     // Update status pesanan
-    $update_sql = "UPDATE pesanan SET status_pesanan = ? WHERE id = ?";
+    $update_sql = "UPDATE pesanan SET status_pesanan = ? WHERE id_pesanan = ?";
     $update_stmt = $conn->prepare($update_sql);
     $update_stmt->bind_param("si", $status_pesanan, $id_pesanan);
     if ($update_stmt->execute()) {

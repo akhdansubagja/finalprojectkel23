@@ -11,14 +11,14 @@ if ($conn->connect_error) {
 
 // Periksa apakah parameter 'id' ada pada URL
 if (isset($_GET['id'])) {
-    $id = intval($_GET['id']); // Mengamankan input dengan intval
+    $id_pesanan = intval($_GET['id']); // Mengamankan input dengan intval
 
     // Query untuk menghapus pesanan berdasarkan ID
-    $sql = "DELETE FROM pesanan WHERE id = ?";
+    $sql = "DELETE FROM pesanan WHERE id_pesanan = ?";
     $stmt = $conn->prepare($sql);
 
     if ($stmt) {
-        $stmt->bind_param("i", $id); // Bind parameter 'id'
+        $stmt->bind_param("i", $id_pesanan); // Bind parameter 'id'
         if ($stmt->execute()) {
             echo "<script>alert('Pesanan berhasil dihapus.');</script>";
         } else {

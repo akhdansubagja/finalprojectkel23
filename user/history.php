@@ -13,7 +13,7 @@ $user_id = $_SESSION['user_id']; // Pastikan session sudah menyimpan data ID pen
 
 // Query untuk mengambil data pesanan user dengan join ke tabel paket
 $sql = "
-    SELECT p.id AS id_pesanan, p.tanggal_pesan, pk.nama_paket, p.status_pesanan 
+    SELECT p.id_pesanan AS id_pesanan, p.tanggal_pesan, pk.nama_paket, p.status_pesanan 
     FROM pesanan p 
     JOIN paket pk ON p.id_paket = pk.id_paket 
     WHERE p.user_id = '$user_id'

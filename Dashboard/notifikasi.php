@@ -17,10 +17,10 @@ if ($conn->connect_error) {
 // Hapus notifikasi jika diminta
 if (isset($_POST['delete_ids'])) {
     $delete_ids = $_POST['delete_ids'];
-    foreach ($delete_ids as $id) {
-        $sql_delete = "DELETE FROM notifications WHERE id = ?";
+    foreach ($delete_ids as $id_notif) {
+        $sql_delete = "DELETE FROM notifications WHERE id_notif = ?";
         $stmt_delete = $conn->prepare($sql_delete);
-        $stmt_delete->bind_param("i", $id);
+        $stmt_delete->bind_param("i", $id_notif);
         $stmt_delete->execute();
     }
     header("Location: notifikasi.php"); // Redirect setelah menghapus
@@ -38,11 +38,21 @@ if (isset($_POST['delete_all'])) {
 // Ambil notifikasi
 $notifications = getNotifications();
 
-// Mengubah status notifikasi saat diklik
+// Mengubah status notifikasi saat diklik dan mengarahkan ke detail_pesanan.php
 if (isset($_GET['mark_read'])) {
-    $id = $_GET['mark_read'];
-    markAsRead($id);
-    header("Location: notifikasi.php"); // Redirect setelah mengubah status
+    $id_notif = $_GET['mark_read'];
+    markAsRead($id_notif);
+    
+    // Ambil id_pesanan dari notifikasi yang diklik
+    $stmt = $conn->prepare("SELECT id_pesanan FROM notifications WHERE id_notif = ?");
+    $stmt->bind_param("i", $id_notif);
+    $stmt->execute();
+    $stmt->bind_result($id_pesanan);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Redirect ke detail_pesanan.php dengan id_pesanan
+    header("Location: detail_pesanan.php?id=" . $id_pesanan);
     exit();
 }
 ?>
@@ -116,8 +126,8 @@ if (isset($_GET['mark_read'])) {
             <ul class="list-group mb-4">
                 <?php foreach ($notifications as $notification): ?>
                     <li class="list-group-item <?php echo $notification['is_read'] ? 'read' : 'unread'; ?>">
-                        <input type="checkbox" name="delete_ids[]" value="<?php echo $notification['id']; ?>">
-                        <a href="?mark_read=<?php echo $notification['id']; ?>" class="text-decoration-none">
+                        <input type="checkbox" name="delete_ids[]" value="<?php echo $notification['id_notif']; ?>">
+                        <a href="?mark_read=<?php echo $notification['id_notif']; ?>" class="text-decoration-none">
                             <?php echo htmlspecialchars($notification['message']); ?>
                         </a>
                         <small class="text-muted"> (<?php echo $notification['created_at']; ?>)</small>

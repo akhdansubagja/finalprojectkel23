@@ -3,11 +3,11 @@
 require_once 'koneksi.php'; // Pastikan ini mengarah ke file koneksi database Anda
 
 // Fungsi untuk menambahkan notifikasi
-function addNotification($message) {
+function addNotification($message, $id_pesanan) {
     global $conn; // Menggunakan koneksi global
 
-    $stmt = $conn->prepare("INSERT INTO notifications (message) VALUES (?)");
-    $stmt->bind_param("s", $message);
+    $stmt = $conn->prepare("INSERT INTO notifications (message, id_pesanan) VALUES (?, ?)");
+    $stmt->bind_param("si", $message, $id_pesanan);
     
     if ($stmt->execute()) {
         // Berhasil menambahkan notifikasi
@@ -33,11 +33,11 @@ function getNotifications() {
 }
 
 // Fungsi untuk menandai notifikasi sebagai dibaca
-function markAsRead($id) {
+function markAsRead($id_notif) {
     global $conn; // Menggunakan koneksi global
 
-    $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE id = ?");
-    $stmt->bind_param("i", $id);
+    $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE id_notif = ?");
+    $stmt->bind_param("i", $id_notif);
     
     if ($stmt->execute()) {
         // Berhasil menandai notifikasi sebagai dibaca
@@ -49,7 +49,7 @@ function markAsRead($id) {
 }
 
 // Contoh penggunaan (uncomment untuk menguji)
-// addNotification("Pesanan baru telah diterima untuk 50 orang.");
+// addNotification("Pesanan baru telah diterima untuk 50 orang.", $id_pesanan);
 // $notifications = getNotifications();
 // print_r($notifications);
 ?>

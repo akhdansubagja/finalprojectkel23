@@ -23,10 +23,10 @@ $id_pesanan = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Query untuk mengambil detail pesanan
 $sql = "
-    SELECT p.id AS id_pesanan, p.tanggal_pesan, pk.nama_paket, pk.tujuan, pk.durasi_hari, p.harga_total, p.tanggal_perjalanan, p.jumlah_peserta, p.nama_pemesan, p.email, p.foto_transfer 
+    SELECT p.id_pesanan AS id_pesanan, p.tanggal_pesan, pk.nama_paket, pk.tujuan, pk.durasi_hari, p.harga_total, p.tanggal_perjalanan, p.jumlah_peserta, p.nama_pemesan, p.email, p.foto_transfer 
     FROM pesanan p 
     JOIN paket pk ON p.id_paket = pk.id_paket 
-    WHERE p.id = '$id_pesanan'
+    WHERE p.id_pesanan = '$id_pesanan'
 ";
 $result = $conn->query($sql);
 

@@ -37,11 +37,14 @@ if ($result_harga->num_rows > 0) {
     $stmt_insert->bind_param("iississ", $id_paket, $user_id, $nama_pemesan, $email, $jumlah_peserta, $harga_total, $tanggal_perjalanan);
     
     if ($stmt_insert->execute()) {
+        // Ambil id_pesanan yang baru saja dimasukkan
+        $id_pesanan = $stmt_insert->insert_id;
+
         // Tambahkan notifikasi setelah pemesanan berhasil
-        addNotification("Pesanan baru telah diterima untuk paket ID: " . htmlspecialchars($id_paket) . " oleh " . htmlspecialchars($nama_pemesan));
+        addNotification("Pesanan baru telah diterima untuk paket ID: " . htmlspecialchars($id_paket) . " oleh " . htmlspecialchars($nama_pemesan), $id_pesanan);
 
         // Redirect ke halaman pembayaran
-        header("Location: pembayaran.php?id_pesanan=" . $stmt_insert->insert_id); // Mengalihkan ke halaman pembayaran
+        header("Location: pembayaran.php?id_pesanan=" . $id_pesanan); // Mengalihkan ke halaman pembayaran
         exit();
     } else {
         die("Gagal melakukan pemesanan: " . $conn->error);

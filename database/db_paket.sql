@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 05, 2024 at 06:56 AM
+-- Generation Time: Dec 17, 2024 at 07:55 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,32 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_paket`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id_notif` int(11) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `is_read` tinyint(4) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id_pesanan` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`id_notif`, `message`, `is_read`, `created_at`, `id_pesanan`) VALUES
+(69, 'Pesanan baru telah diterima untuk paket ID: 72 oleh Mr. Lawak', 1, '2024-12-17 06:50:36', 118),
+(70, 'Pesanan baru telah diterima untuk paket ID: 72 oleh Mr. Lawak', 0, '2024-12-17 06:50:39', 119),
+(71, 'Pesanan baru telah diterima untuk paket ID: 71 oleh Mr. Lawak', 0, '2024-12-17 06:50:46', 120),
+(72, 'Pesanan baru telah diterima untuk paket ID: 71 oleh Mr. Lawak', 0, '2024-12-17 06:50:49', 121),
+(73, 'Pesanan baru telah diterima untuk paket ID: 67 oleh Mr. Lawak', 0, '2024-12-17 06:50:57', 122),
+(74, 'Pesanan baru telah diterima untuk paket ID: 67 oleh Mr. Lawak', 0, '2024-12-17 06:51:00', 123);
 
 -- --------------------------------------------------------
 
@@ -43,13 +69,9 @@ CREATE TABLE `paket` (
 --
 
 INSERT INTO `paket` (`id_paket`, `nama_paket`, `tujuan`, `durasi_hari`, `harga`, `status_paket`, `deskripsi`, `foto`) VALUES
-(4, 'Paket Surga Raja Ampat', 'Raja Ampat', '7', '8500000', 'Aktif', '0', NULL),
-(7, 'Surakarta', 'Surabaya', '7', '2400000', 'Aktif', '0', NULL),
-(12, 'nrsnrsdnsrg', 'test', '2', '2222222', 'Aktif', '0', '1733308626_zlogo.png'),
-(13, 'Paket Tour Bandung', 'Bandung', '3', '7500000', 'Aktif', '0', '1733308626_zlogo.png'),
-(14, 'Paket paketan', 'Gatau', '4', '5500000', 'Aktif', 'xdrctfvygbuh', '1733336800_56f35306-75a5-4943-ba31-d183a4af0b7c.jpg'),
-(20, 'res', 'cd', '3', '2020202', 'Aktif', '1733339463', 'nhbrgvefs'),
-(21, 'ressvsvs', 'vvevev', '4', '1515151', 'Aktif', 'tnhbgrvfdcsx', '1733339712');
+(67, 'Paket Tour Bali', 'Bali', '2', '2000000', 'Aktif', 'v csyghjcefc egcbicnwsl', '1733837169_lukisan-merpati.jpg'),
+(71, 'Paket Tour Bandung', 'Bandung', '5', '5000000', 'Aktif', 'why you got be so rude', '../uploads/1734411874_download.jpeg'),
+(72, 'Nama Paket Baru', 'Tujuan Baru', '2', '2000000', 'Aktif', 'jynhtgf nu6ytbfh 6uy', '../uploads/1734415159_download.jpg');
 
 -- --------------------------------------------------------
 
@@ -58,26 +80,30 @@ INSERT INTO `paket` (`id_paket`, `nama_paket`, `tujuan`, `durasi_hari`, `harga`,
 --
 
 CREATE TABLE `pesanan` (
-  `id` int(11) NOT NULL,
+  `id_pesanan` int(11) NOT NULL,
   `id_paket` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `nama_pemesan` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `jumlah_peserta` int(11) NOT NULL,
-  `harga_total` decimal(10,2) NOT NULL,
+  `harga_total` decimal(20,2) NOT NULL,
   `tanggal_perjalanan` date DEFAULT NULL,
   `tanggal_pesan` timestamp NOT NULL DEFAULT current_timestamp(),
   `foto_transfer` varchar(255) NOT NULL,
-  `status_pesanan` enum('Pending','Dikonfirmasi','Dibatalkan') DEFAULT 'Pending'
+  `status_pesanan` enum('Pending','Dikonfirmasi','Dibatalkan','Selesai') DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `pesanan`
 --
 
-INSERT INTO `pesanan` (`id`, `id_paket`, `user_id`, `nama_pemesan`, `email`, `jumlah_peserta`, `harga_total`, `tanggal_perjalanan`, `tanggal_pesan`, `foto_transfer`, `status_pesanan`) VALUES
-(13, 7, 66, 'a', 'akhdanixe@gmail.com', 200, 99999999.99, '2025-01-01', '2024-11-29 17:29:47', '13_1732901398.jpg', 'Dikonfirmasi'),
-(22, 4, 66, 'a', 'akhdanixe@gmail.com', 8, 68000000.00, '2024-12-27', '2024-12-04 18:00:07', '22_1733335215.png', 'Pending');
+INSERT INTO `pesanan` (`id_pesanan`, `id_paket`, `user_id`, `nama_pemesan`, `email`, `jumlah_peserta`, `harga_total`, `tanggal_perjalanan`, `tanggal_pesan`, `foto_transfer`, `status_pesanan`) VALUES
+(118, 72, 70, 'Mr. Lawak', 'akhdanixe@gmail.com', 20, 40000000.00, '2024-12-31', '2024-12-17 06:50:36', '', 'Dikonfirmasi'),
+(119, 72, 70, 'Mr. Lawak', 'akhdanixe@gmail.com', 20, 40000000.00, '2024-12-30', '2024-12-17 06:50:39', '', 'Pending'),
+(120, 71, 70, 'Mr. Lawak', 'akhdanixe@gmail.com', 20, 100000000.00, '2024-12-29', '2024-12-17 06:50:46', '', 'Pending'),
+(121, 71, 70, 'Mr. Lawak', 'akhdanixe@gmail.com', 20, 100000000.00, '2024-12-28', '2024-12-17 06:50:49', '', 'Pending'),
+(122, 67, 70, 'Mr. Lawak', 'akhdanixe@gmail.com', 20, 40000000.00, '2024-12-27', '2024-12-17 06:50:57', '', 'Pending'),
+(123, 67, 70, 'Mr. Lawak', 'akhdanixe@gmail.com', 20, 40000000.00, '2024-12-26', '2024-12-17 06:51:00', '', 'Pending');
 
 -- --------------------------------------------------------
 
@@ -111,31 +137,32 @@ CREATE TABLE `users` (
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('user','admin') DEFAULT 'user'
+  `role` enum('user','admin') DEFAULT 'user',
+  `reset_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `role`) VALUES
-(2, 'afafat', 'fau@gmail.com', 'fcc95dc4857501665b5eddf95a3344f0', 'admin'),
-(3, 'fufufafa', 'fufu@gmail.com', '$argon2i$v=19$m=65536,t=4,p=1$S3E0Z3E4ZzFkZVhmWU1FTw$wFd4zdy5k7+QUGCeceZsuvvaCKk34+zyj3UXQS4ZOvQ', 'user'),
-(5, 'fufufafa', 'gdygdy@gmail.com', 'b49af1c38353da751daa03311e05abea', 'user'),
-(6, 'fufufafa', 'gdy@gmail.com', 'e66b7a96ed55bce8d7a4d11854cc6bca', 'user'),
-(7, 'fufufafa', 'gyqo@gmail.com', '3da4f5acbf20cc5bfb67de13c9b70376', 'user'),
-(8, 'fufufafa', 'gyq@gmail.com', '7d6d227d6a3b3723ec571d8166586738', 'user'),
-(9, 'fufufafa', 'gyqr@gmail.com', 'edc879f290da45e2a62acaf7b165fceb', 'user'),
-(10, 'fufufafa', 'gytt@gmail.com', '9227fea122ab8bd9cadaf2ca73752c8d', 'user'),
-(11, 'fufufafa', 'ufuhfuu@gmail.com', '48de35d5855b4330352464c2b7994b35', 'user'),
-(55, 'Oji', 'fufu@gmail.om', '0dad6b705ed6bbcee824ab17ea19dd90', 'admin'),
-(66, 'a', 'akhdanixe@gmail.com', '$2y$10$O.yE3jVr/0FZxWrGxkJmoO6/Cv4t3zM9B511AtTMNFtyOI9xgxAWq', 'user'),
-(67, 'a', 'avixleonel@gmail.com', '$2y$10$mJ0Fmp4Nbt8N.ZXntmwy3ufU9PPERSJOE4RU.JRJoDDAxDJWL76Ry', 'admin'),
-(68, 'Akhdan Subagja', 'dan@dan.com', '$2y$10$LqCGvR2lptJ/sn1Kb.7Za.E2V68e9OTq5B2IZlVNeFGISiP6pzEHS', 'user');
+INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `role`, `reset_token`) VALUES
+(55, 'Oji', 'fufu@gmail.om', '0dad6b705ed6bbcee824ab17ea19dd90', 'admin', NULL),
+(67, 'a', 'avixleonel@gmail.com', '$2y$10$/4CZyXeKJKIzcA7uetUfDuvWjPy/GXv3mgVSeBoHY7qmzpT8HIaYa', 'admin', NULL),
+(68, 'Akhdan Subagja', 'dan@dan.com', '$2y$10$LqCGvR2lptJ/sn1Kb.7Za.E2V68e9OTq5B2IZlVNeFGISiP6pzEHS', 'user', NULL),
+(69, 'a', 'tidakberkah6@gmail.com', '$2y$10$7gFxiVZZa0w8kvdQ8O053e1yvoWdBgq4/e1Ufw4PCluyXRODmxW6G', 'user', NULL),
+(70, 'Mr. Lawak', 'akhdanixe@gmail.com', '$2y$10$I52YJldVM5rq7BNwGHhQRuDMSknyYs.eiLE2tzFPjZ4myOEKBO7HS', 'user', 'a7b30683382c10e4a6d2bc4392dae28d1345e56a977a31f9f294cd064899d72bd456664aaad62cf47b19009eb8bfecb45723'),
+(71, 'Mr. Awikwok', 'awikwok@wok.com', '$2y$10$mFy63G9CEMv0lFmOV48uDO7rjpzCtUjoPkD5kKwGMGEWlVodpjwPW', 'user', NULL);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id_notif`),
+  ADD KEY `fk_id_pesanan` (`id_pesanan`);
 
 --
 -- Indexes for table `paket`
@@ -147,7 +174,7 @@ ALTER TABLE `paket`
 -- Indexes for table `pesanan`
 --
 ALTER TABLE `pesanan`
-  ADD PRIMARY KEY (`id`),
+  ADD PRIMARY KEY (`id_pesanan`),
   ADD KEY `pesanan_ibfk_1` (`id_paket`),
   ADD KEY `user_id` (`user_id`);
 
@@ -171,16 +198,22 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id_notif` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+
+--
 -- AUTO_INCREMENT for table `paket`
 --
 ALTER TABLE `paket`
-  MODIFY `id_paket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id_paket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT for table `pesanan`
 --
 ALTER TABLE `pesanan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id_pesanan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
 -- AUTO_INCREMENT for table `pesanan_custom`
@@ -192,11 +225,17 @@ ALTER TABLE `pesanan_custom`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `fk_id_pesanan` FOREIGN KEY (`id_pesanan`) REFERENCES `pesanan` (`id_pesanan`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `pesanan`

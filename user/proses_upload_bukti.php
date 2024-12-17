@@ -31,7 +31,7 @@ if (isset($_FILES['foto_transfer']) && $_FILES['foto_transfer']['error'] === UPL
     // Pindahkan file ke folder upload
     if (move_uploaded_file($fileTmpPath, $uploadPath . $newFileName)) {
         // Perbarui database dengan nama file baru
-        $sql = "UPDATE pesanan SET foto_transfer = ? WHERE id = ?";
+        $sql = "UPDATE pesanan SET foto_transfer = ? WHERE id_pesanan = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $newFileName, $id_pesanan);
 

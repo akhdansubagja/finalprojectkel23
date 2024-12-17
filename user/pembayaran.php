@@ -26,7 +26,7 @@ if (!isset($_GET['id_pesanan']) || !is_numeric($_GET['id_pesanan'])) {
 $id_pesanan = intval($_GET['id_pesanan']);
 
 // Ambil data pesanan dari database
-$sql = "SELECT * FROM pesanan WHERE id = ?";
+$sql = "SELECT * FROM pesanan WHERE id_pesanan = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_pesanan);
 $stmt->execute();

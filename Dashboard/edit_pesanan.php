@@ -22,7 +22,7 @@ header("Expires: 0"); // Untuk semua
 $id_pesanan = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Ambil data pesanan berdasarkan ID
-$sql = "SELECT * FROM pesanan WHERE id = '$id_pesanan'";
+$sql = "SELECT * FROM pesanan WHERE id_pesanan = '$id_pesanan'";
 $result = $conn->query($sql);
 
 if ($result->num_rows == 0) {
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $status_pesanan = $_POST['status_pesanan'];
 
     // Update status pesanan
-    $update_sql = "UPDATE pesanan SET status_pesanan = '$status_pesanan' WHERE id = '$id_pesanan'";
+    $update_sql = "UPDATE pesanan SET status_pesanan = '$status_pesanan' WHERE id_pesanan = '$id_pesanan'";
     if ($conn->query($update_sql) === TRUE) {
         // Kirim tiket ke email pengguna
         $to = $row['email'];
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mail($to, $subject, $message);
 
         // Redirect ke halaman kelola pesanan dengan status sukses
-        header("Location: kelola_pesanan.php?status=success");
+        header("Location: kelola_pesanan.php");
         exit();
     } else {
         echo "Error updating record: " . $conn->error;

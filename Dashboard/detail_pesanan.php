@@ -2,8 +2,8 @@
 session_start();
 
 // Cek apakah pengguna sudah login
-if (!isset($_SESSION['user_id'])) { // Ganti 'user_id' dengan nama variabel sesi yang Anda gunakan
-    header("Location: ../login.html"); // Arahkan ke halaman login jika belum login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.html");
     exit();
 }
 
@@ -13,83 +13,104 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Atur header untuk mencegah caching
-header("Cache-Control: no-cache, no-store, must-revalidate"); // Untuk HTTP 1.1
-header("Pragma: no-cache"); // Untuk HTTP 1.0
-header("Expires: 0"); // Untuk semua
+// Ambil ID pemesanan dari parameter URL
+$id_pesanan = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-if (isset($_GET['id'])) {
-    $id_pesanan = $_GET['id'];
+// Query untuk mengambil detail pemesanan
+$sql = "SELECT p.*, pk.nama_paket 
+        FROM pesanan p 
+        JOIN paket pk ON p.id_paket = pk.id_paket 
+        WHERE p.id_pesanan = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_pesanan);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    // Ambil detail pesanan
-    $sql = "SELECT pesanan.*, paket.nama_paket, users.name AS nama_user 
-            FROM pesanan 
-            JOIN paket ON pesanan.id_paket = paket.id_paket
-            JOIN users ON pesanan.user_id = users.user_id
-            WHERE pesanan.id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id_pesanan);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $pesanan = $result->fetch_assoc();
-    } else {
-        die("Pesanan tidak ditemukan.");
-    }
-} else {
-    die("ID pesanan tidak diberikan.");
+if ($result->num_rows == 0) {
+    die("Pesanan tidak ditemukan.");
 }
-?>
 
+$row = $result->fetch_assoc();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Pesanan</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detail Pemesanan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container my-5">
-        <h1 class="text-center mb-4">Detail Pesanan</h1>
-
-        <table class="table table-bordered">
-            <tr>
-                <th>ID Pesanan</th>
-                <td><?php echo htmlspecialchars($pesanan['id']); ?></td>
-            </tr>
-            <tr>
-                <th>Nama Pemesan</th>
-                <td><?php echo htmlspecialchars($pesanan['nama_user']); ?></td>
-            </tr>
-            <tr>
-                <th>Paket</th>
-                <td><?php echo htmlspecialchars($pesanan['nama_paket']); ?></td>
-            </tr>
-            <tr>
-                <th>Status Pesanan</th>
-                <td><?php echo htmlspecialchars($pesanan['status_pesanan']); ?></td>
-            </tr>
-            <tr>
-                <th>Tanggal Pemesanan</th>
-                <td><?php echo htmlspecialchars($pesanan['tanggal_pesan']); ?></td>
-            </tr>
-            <tr>
-                <th>jumlah Peserta</th>
-                <td><?php echo htmlspecialchars($pesanan['jumlah_peserta']); ?></td>
-            </tr>
-            <tr>
-                <th>Catatan</th>
-                <td><?php echo htmlspecialchars($pesanan['catatan']); // Jika ada kolom catatan ?></td>
-            </tr>
-        </table>
-
-        <div class="text-center">
-            <a href="kelola_pesanan.php" class="btn btn-primary">Kembali</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="admin.php">Manajemen Pesanan</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="kelola_pesanan.php">Kelola Pesanan</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../Backend/logout.php">Logout</a>
+                </li>
+            </ul>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</nav>
+<div class="container my-5">
+    <h1 class="text-center mb-4">Detail Pemesanan</h1>
+    <table class="table table-bordered">
+        <tr>
+            <th>Nomor Pemesanan</th>
+            <td><?= htmlspecialchars($row['id_pesanan']) ?></td>
+        </tr>
+        <tr>
+            <th>Nama Pemesan</th>
+            <td><?= htmlspecialchars($row['nama_pemesan']) ?></td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td><?= htmlspecialchars($row['email']) ?></td>
+        </tr>
+        <tr>
+            <th>Jumlah Peserta</th>
+            <td><?= htmlspecialchars($row['jumlah_peserta']) ?></td>
+        </tr>
+        <tr>
+            <th>Harga Total</th>
+            <td>Rp <?= number_format($row['harga_total'], 2, ',', '.') ?></td>
+        </tr>
+        <tr>
+            <th>Tanggal Pesan</th>
+            <td><?= htmlspecialchars($row['tanggal_pesan']) ?></td>
+        </tr>
+        <tr>
+            <th>Tanggal Perjalanan</th>
+            <td><?= htmlspecialchars($row['tanggal_perjalanan']) ?></td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td><?= htmlspecialchars($row['status_pesanan']) ?></td>
+        </tr>
+        <tr>
+            <th>Nama Paket</th>
+            <td><?= htmlspecialchars($row['nama_paket']) ?></td>
+        </tr>
+        <tr>
+            <th>Foto Transfer</th>
+            <td>
+                <?php if (!empty($row['foto_transfer'])): ?>
+                    <img src="../uploads/bukti_pembayaran/<?= htmlspecialchars($row['foto_transfer']) ?>" class="img-fluid" alt="Foto Transfer">
+                <?php else: ?>
+                    Tidak ada foto.
+                <?php endif; ?>
+            </td>
+        </tr>
+    </table>
+    <a href="kelola_pesanan.php" class="btn btn-secondary">Kembali</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
