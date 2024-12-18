@@ -6,7 +6,7 @@ require_once 'koneksi.php'; // Pastikan ini mengarah ke file koneksi database An
 function addNotification($message, $id_pesanan) {
     global $conn; // Menggunakan koneksi global
 
-    $stmt = $conn->prepare("INSERT INTO notifications (message, id_pesanan) VALUES (?, ?)");
+    $stmt = $conn->prepare("INSERT INTO notifications (message, id_pesanan, created_at) VALUES (?, ?, NOW())");
     $stmt->bind_param("si", $message, $id_pesanan);
     
     if ($stmt->execute()) {

@@ -2,8 +2,8 @@
 session_start();
 
 // Cek apakah pengguna sudah login
-if (!isset($_SESSION['user_id'])) { // Ganti 'user_id' dengan nama variabel sesi yang Anda gunakan
-    header("Location: ../login.html"); // Arahkan ke halaman login jika belum login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.html");
     exit();
 }
 
@@ -26,7 +26,7 @@ if (!isset($_GET['id_pesanan']) || !is_numeric($_GET['id_pesanan'])) {
 $id_pesanan = intval($_GET['id_pesanan']);
 
 // Ambil data pesanan dari database
-$sql = "SELECT * FROM pesanan WHERE id_pesanan = ?";
+$sql = "SELECT *, masa_pembayaran, status_pembayaran FROM pesanan WHERE id_pesanan = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_pesanan);
 $stmt->execute();
@@ -45,8 +45,51 @@ $pesanan = $result->fetch_assoc();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pembayaran - Pesanan #<?= htmlspecialchars($pesanan['id']) ?></title>
+    <title>Pembayaran - Pesanan #<?= htmlspecialchars($pesanan['id_pesanan']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        // Menghitung waktu mundur
+        function startCountdown(endTime) {
+            const countdownElement = document.getElementById('countdown');
+            const end = new Date(endTime).getTime();
+
+            const timer = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = end - now;
+
+                // Hitung waktu yang tersisa
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Tampilkan hasil dalam elemen countdown
+                countdownElement.innerHTML = hours + " jam " + minutes + " menit " + seconds + " detik ";
+
+                // Jika waktu habis, tampilkan pesan dan sembunyikan elemen
+                if (distance < 0) {
+                    clearInterval(timer);
+                    countdownElement.innerHTML = "Waktu pembayaran telah habis.";
+                    document.getElementById('uploadForm').style.display = 'none'; // Sembunyikan form upload
+                    document.getElementById('bankList').style.display = 'none'; // Sembunyikan daftar bank
+                }
+            }, 1000);
+        }
+
+        // Ambil waktu batas pembayaran dari PHP
+        window.onload = function() {
+            const masaPembayaran = "<?= $pesanan['masa_pembayaran'] ?>";
+            const statusPembayaran = "<?= $pesanan['status_pembayaran'] ?>";
+
+            // Hentikan timer jika status pembayaran sudah dibayar
+            if (statusPembayaran === 'Sudah Dibayar') {
+                document.getElementById('countdown').innerHTML = "Pembayaran sudah dilakukan.";
+                document.getElementById('uploadForm').style.display = 'none'; // Sembunyikan form upload
+                document.getElementById('bankList').style.display = 'none'; // Sembunyikan daftar bank
+            } else {
+                startCountdown(masaPembayaran);
+            }
+        };
+    </script>
 </head>
 <body>
     <div class="container my-5">
@@ -64,7 +107,7 @@ $pesanan = $result->fetch_assoc();
             </div>
         </div>
 
-        <div class="mt-4">
+        <div class="mt-4" id="bankList">
             <h3>Daftar Bank</h3>
             <ul class="list-group">
                 <li class="list-group-item">Bank Mandiri - 1234567890 Atas nama ihdihid</li>
@@ -75,7 +118,7 @@ $pesanan = $result->fetch_assoc();
             </ul>
         </div>
 
-        <div class="mt-5">
+        <div class="mt-5" id="uploadForm">
             <h3>Unggah Bukti Pembayaran</h3>
             <form action="proses_upload_bukti.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="id_pesanan" value="<?= $id_pesanan ?>">
@@ -85,6 +128,11 @@ $pesanan = $result->fetch_assoc();
                 </div>
                 <button type="submit" class="btn btn-primary">Unggah Bukti Pembayaran</button>
             </form>
+        </div>
+
+        <div class="mt-4">
+            <h3>Waktu Pembayaran Tersisa</h3>
+            <p id="countdown" class="text-danger"></p>
         </div>
 
         <div class="mt-4 text-center">

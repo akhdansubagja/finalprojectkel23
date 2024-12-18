@@ -99,6 +99,10 @@ $row = $result->fetch_assoc();
             <td><?= htmlspecialchars($row['nama_paket']) ?></td>
         </tr>
         <tr>
+            <th>Status Pembayaran</th>
+            <td><?= htmlspecialchars($row['status_pembayaran']) ?></td>
+        </tr>
+        <tr>
             <th>Foto Transfer</th>
             <td>
                 <?php if (!empty($row['foto_transfer'])): ?>

@@ -3,6 +3,8 @@ include '../backend/koneksi.php';
 require_once '../backend/notification.php'; // Tambahkan ini untuk mengakses fungsi notifikasi
 session_start(); // Memulai sesi
 
+date_default_timezone_set('Asia/Jakarta'); // Ganti dengan zona waktu yang sesuai
+
 // Cek apakah user sudah login
 if (!isset($_SESSION['user_id'])) {
     die("Anda harus login untuk melakukan pemesanan.");
@@ -30,11 +32,14 @@ if ($result_harga->num_rows > 0) {
     // Hitung total harga
     $harga_total = $harga_per_orang * $jumlah_peserta;
 
+    // Atur masa pembayaran menjadi 24 jam dari sekarang
+    $masa_pembayaran = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
     // Masukkan data pesanan ke tabel pesanan
-    $sql_insert = "INSERT INTO pesanan (id_paket, user_id, nama_pemesan, email, jumlah_peserta, harga_total, tanggal_pesan, tanggal_perjalanan) 
-                   VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)";
+    $sql_insert = "INSERT INTO pesanan (id_paket, user_id, nama_pemesan, email, jumlah_peserta, harga_total, tanggal_pesan, tanggal_perjalanan, masa_pembayaran) 
+                   VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
     $stmt_insert = $conn->prepare($sql_insert);
-    $stmt_insert->bind_param("iississ", $id_paket, $user_id, $nama_pemesan, $email, $jumlah_peserta, $harga_total, $tanggal_perjalanan);
+    $stmt_insert->bind_param("iississs", $id_paket, $user_id, $nama_pemesan, $email, $jumlah_peserta, $harga_total, $tanggal_perjalanan, $masa_pembayaran);
     
     if ($stmt_insert->execute()) {
         // Ambil id_pesanan yang baru saja dimasukkan

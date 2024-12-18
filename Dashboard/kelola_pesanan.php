@@ -2,8 +2,8 @@
 session_start();
 
 // Cek apakah pengguna sudah login
-if (!isset($_SESSION['user_id'])) { // Ganti 'user_id' dengan nama variabel sesi yang Anda gunakan
-    header("Location: ../login.html"); // Arahkan ke halaman login jika belum login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.html");
     exit();
 }
 
@@ -18,11 +18,29 @@ header("Cache-Control: no-cache, no-store, must-revalidate"); // Untuk HTTP 1.1
 header("Pragma: no-cache"); // Untuk HTTP 1.0
 header("Expires: 0"); // Untuk semua
 
+// Fungsi untuk memperbarui status pesanan
+function updateOrderStatus($conn) {
+    $sql = "
+        UPDATE pesanan 
+        SET status_pesanan = 'Dibatalkan' 
+        WHERE status_pesanan = 'Pending' AND masa_pembayaran < NOW() AND status_pembayaran = 'Belum Dibayar'
+    ";
+
+    if ($conn->query($sql) === TRUE) {
+        // return "Status pesanan berhasil diperbarui.";
+    } else {
+        return "Error updating record: " . $conn->error;
+    }
+}
+
+// Panggil fungsi untuk memperbarui status pesanan
+$message = updateOrderStatus($conn);
+
 // Ambil status pemesanan dari parameter URL jika ada
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'semua';
 
 // Query untuk mengambil data dari tabel pesanan dan nama paket
-$sql = "SELECT p.id_pesanan, p.id_paket, p.user_id, p.nama_pemesan, p.email, p.jumlah_peserta, p.harga_total, p.tanggal_pesan, p.tanggal_perjalanan, p.status_pesanan, pk.nama_paket 
+$sql = "SELECT p.id_pesanan, p.id_paket, p.user_id, p.nama_pemesan, p.email, p.jumlah_peserta, p.harga_total, p.tanggal_pesan, p.status_pembayaran, p.status_pesanan, pk.nama_paket 
 FROM pesanan p 
 JOIN paket pk ON p.id_paket = pk.id_paket";
 
@@ -67,6 +85,11 @@ $result = $conn->query($sql);
 <div class="container my-5">
     <h1 class="text-center mb-4">Daftar Pesanan</h1>
 
+    <!-- Tampilkan pesan jika ada -->
+    <?php if (isset($message)): ?>
+        <div class="alert alert-info"><?= $message ?></div>
+    <?php endif; ?>
+
     <!-- Dropdown untuk menyortir berdasarkan status -->
     <form method="GET" class="mb-4">
         <div class="input-group">
@@ -89,7 +112,7 @@ $result = $conn->query($sql);
                 <th>Jumlah Peserta</th>
                 <th>Harga Total</th>
                 <th>Tanggal Pesan</th>
-                <th>Tanggal Perjalanan</th>
+                <th>Status Pembayaran</th>
                 <th>Status</th>
                 <th>Nama Paket</th> <!-- Kolom untuk nama paket -->
                 <th>Aksi</th>
@@ -106,7 +129,7 @@ $result = $conn->query($sql);
                             <td>' . htmlspecialchars($row['jumlah_peserta']) . '</td>
                             <td>Rp ' . number_format($row['harga_total'], 2, ',', '.') . '</td>
                             <td>' . htmlspecialchars($row['tanggal_pesan']) . '</td>
-                            <td>' . htmlspecialchars($row['tanggal_perjalanan']) . '</td>
+                            <td>' . htmlspecialchars($row['status_pembayaran']) . '</td>
                             <td>' . (isset($row['status_pesanan']) ? htmlspecialchars($row['status_pesanan']) : 'Tidak ada status') . '</td>
                             <td>' . htmlspecialchars($row['nama_paket']) . '</td> <!-- Tampilkan nama paket -->
                             <td>
