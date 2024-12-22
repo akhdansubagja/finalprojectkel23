@@ -53,6 +53,7 @@ if (!$user) {
             <div class="card-body">
                 <h5 class="card-title">Nama: <?php echo htmlspecialchars($user['name']); ?></h5> <!-- Sesuaikan dengan kolom 'name' di database -->
                 <p class="card-text"><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
+                <p class="card-text"><strong>Nomor Handphone:</strong> <?php echo htmlspecialchars($user['no_hp']); ?></p>
                 <a href="edit_profile.php" class="btn btn-primary">Edit Profil</a>
             </div>
         </div>

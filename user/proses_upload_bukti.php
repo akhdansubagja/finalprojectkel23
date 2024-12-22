@@ -14,7 +14,7 @@ $id_pesanan = $_POST['id_pesanan'];
 // Proses upload bukti pembayaran
 if (isset($_FILES['foto_transfer']) && $_FILES['foto_transfer']['error'] == 0) {
     $target_dir = "../uploads/bukti_pembayaran/";
-    $target_file = $target_dir . basename($_FILES["foto_transfer"]["name"]);
+    $target_file = $target_dir . time() . "_" . basename($_FILES["foto_transfer"]["name"]);
     $uploadOk = 1;
     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
@@ -43,23 +43,38 @@ if (isset($_FILES['foto_transfer']) && $_FILES['foto_transfer']['error'] == 0) {
     } else {
         if (move_uploaded_file($_FILES["foto_transfer"]["tmp_name"], $target_file)) {
             // Simpan nama file ke dalam variabel
-            $foto_transfer = basename($_FILES["foto_transfer"]["name"]);
+            $foto_transfer = time() . "_" . basename($_FILES["foto_transfer"]["name"]);
 
-            // Update foto_transfer dan status pembayaran di tabel pesanan
-            $sql_update = "UPDATE pesanan SET foto_transfer = ?, status_pembayaran = 'Sudah Dibayar' WHERE id_pesanan = ?";
-            $stmt_update = $conn->prepare($sql_update);
-            $stmt_update->bind_param("si", $foto_transfer, $id_pesanan);
-            if ($stmt_update->execute()) {
-                echo "Bukti pembayaran berhasil diunggah.";
+            // Ambil nama pemesan dari tabel pesanan
+            $sql_nama = "SELECT nama_pemesan FROM pesanan WHERE id_pesanan = ?";
+            $stmt_nama = $conn->prepare($sql_nama);
+            $stmt_nama->bind_param("i", $id_pesanan);
+            $stmt_nama->execute();
+            $result_nama = $stmt_nama->get_result();
 
-                // Tambahkan notifikasi untuk admin
-                $pesan_notifikasi = "User dengan ID " . $_SESSION['user_id'] . " telah melakukan pembayaran untuk pesanan ID: " . $id_pesanan;
-                addNotification($pesan_notifikasi, $id_pesanan); // Panggil fungsi notifikasi dengan variabel yang benar
+            if ($result_nama->num_rows > 0) {
+                $row_nama = $result_nama->fetch_assoc();
+                $nama_pemesan = $row_nama['nama_pemesan'];
 
+                // Update foto_transfer dan status pembayaran di tabel pesanan
+                $sql_update = "UPDATE pesanan SET foto_transfer = ?, status_pembayaran = 'Sudah Dibayar' WHERE id_pesanan = ?";
+                $stmt_update = $conn->prepare($sql_update);
+                $stmt_update->bind_param("si", $foto_transfer, $id_pesanan);
+                if ($stmt_update->execute()) {
+                    echo "Bukti pembayaran berhasil diunggah.";
+
+                    // Tambahkan notifikasi untuk admin
+                    $pesan_notifikasi = "$nama_pemesan telah melakukan pembayaran untuk ID pesanan: " . $id_pesanan;
+                    addNotification($pesan_notifikasi, $id_pesanan); // Panggil fungsi notifikasi dengan variabel yang benar
+
+                } else {
+                    echo "Gagal memperbarui data pesanan: " . $conn->error;
+                }
+                $stmt_update->close();
             } else {
-                echo "Gagal memperbarui data pesanan: " . $conn->error;
+                echo "Nama pemesan tidak ditemukan.";
             }
-            $stmt_update->close();
+            $stmt_nama->close();
         } else {
             echo "Maaf, terjadi kesalahan saat mengunggah file.";
         }

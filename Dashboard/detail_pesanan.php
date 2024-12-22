@@ -17,9 +17,10 @@ if ($conn->connect_error) {
 $id_pesanan = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Query untuk mengambil detail pemesanan
-$sql = "SELECT p.*, pk.nama_paket 
+$sql = "SELECT p.*, pk.nama_paket, u.no_hp 
         FROM pesanan p 
         JOIN paket pk ON p.id_paket = pk.id_paket 
+        JOIN users u ON p.user_id = u.user_id 
         WHERE p.id_pesanan = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_pesanan);
@@ -73,6 +74,10 @@ $row = $result->fetch_assoc();
         <tr>
             <th>Email</th>
             <td><?= htmlspecialchars($row['email']) ?></td>
+        </tr>
+        <tr>
+            <th>No Handphone</th>
+            <td><?= htmlspecialchars($row['no_hp']) ?></td>
         </tr>
         <tr>
             <th>Jumlah Peserta</th>

@@ -46,7 +46,7 @@ if ($result_harga->num_rows > 0) {
         $id_pesanan = $stmt_insert->insert_id;
 
         // Tambahkan notifikasi setelah pemesanan berhasil
-        addNotification("Pesanan baru telah diterima untuk paket ID: " . htmlspecialchars($id_paket) . " oleh " . htmlspecialchars($nama_pemesan), $id_pesanan);
+        addNotification("Pesanan baru telah diterima dengan ID Pesanan: " . htmlspecialchars($id_pesanan) . " oleh " . htmlspecialchars($nama_pemesan), $id_pesanan);
 
         // Redirect ke halaman pembayaran
         header("Location: pembayaran.php?id_pesanan=" . $id_pesanan); // Mengalihkan ke halaman pembayaran

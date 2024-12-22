@@ -14,11 +14,13 @@ if ($conn->connect_error) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $email = $_POST['email'];
+    $no_hp = $_POST['no_hp'];
     $password = $_POST['password'];
 
     // Mencegah SQL Injection
     $name = $conn->real_escape_string($name);
     $email = $conn->real_escape_string($email);
+    $no_hp = $conn->real_escape_string($no_hp);
     $password = $conn->real_escape_string($password);
 
     // Hash password dengan password_hash untuk keamanan yang lebih baik
@@ -31,16 +33,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         echo "<script>alert('Email sudah terdaftar. Silakan gunakan email lain.');</script>";
     } else {
-        // Query untuk menyimpan data pengguna baru
-        $sql = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', '$hashed_password')";
+        // Cek apakah no_hp sudah terdaftar
+        $check_no_hp_sql = "SELECT * FROM users WHERE no_hp='$no_hp'";
+        $result_no_hp = $conn->query($check_no_hp_sql);
 
-        if ($conn->query($sql) === TRUE) {
-            echo "<script>alert('Pendaftaran berhasil! Silakan login.');</script>";
-            // Alihkan pengguna ke halaman login
-            echo "<script>window.location.href = '../login.html';</script>";
-            exit();
+        if ($result_no_hp->num_rows > 0) {
+            echo "<script>alert('Nomor HP sudah terdaftar. Silakan gunakan nomor lain.');</script>";
         } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            // Query untuk menyimpan data pengguna baru
+            $sql = "INSERT INTO users (name, email, no_hp, password) VALUES ('$name', '$email', '$no_hp', '$hashed_password')";
+
+            if ($conn->query($sql) === TRUE) {
+                echo "<script>alert('Pendaftaran berhasil! Silakan login.');</script>";
+                // Alihkan pengguna ke halaman login
+                echo "<script>window.location.href = '../login.html';</script>";
+                exit();
+            } else {
+                echo "Error: " . $sql . "<br>" . $conn->error;
+            }
         }
     }
 }
