@@ -2,8 +2,8 @@
 session_start();
 
 // Cek apakah pengguna sudah login
-if (!isset($_SESSION['user_id'])) { // Ganti 'user_id' dengan nama variabel sesi yang Anda gunakan
-    header("Location: ../login.html"); // Arahkan ke halaman login jika belum login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.html");
     exit();
 }
 
@@ -17,6 +17,9 @@ if ($conn->connect_error) {
 header("Cache-Control: no-cache, no-store, must-revalidate"); // Untuk HTTP 1.1
 header("Pragma: no-cache"); // Untuk HTTP 1.0
 header("Expires: 0"); // Untuk semua
+
+// Panggil fungsi untuk memperbarui status pesanan
+updateOrderStatus($conn);
 
 // Cek apakah user sudah login
 $is_logged_in = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
@@ -51,8 +54,8 @@ if ($result->num_rows > 0) {
     die("Paket tidak ditemukan.");
 }
 
-// Ambil tanggal yang sudah dipesan untuk paket ini
-$sql_dates = "SELECT tanggal_perjalanan FROM pesanan WHERE id_paket = ?";
+// Ambil tanggal yang sudah dipesan untuk paket ini dengan status "pending" dan "Dikonfirmasi"
+$sql_dates = "SELECT tanggal_perjalanan FROM pesanan WHERE id_paket = ? AND (status_pesanan = 'Pending' OR status_pesanan = 'Dikonfirmasi')";
 $stmt_dates = $conn->prepare($sql_dates);
 $stmt_dates->bind_param("i", $id_paket);
 $stmt_dates->execute();
@@ -62,6 +65,7 @@ $booked_dates = [];
 while ($row = $result_dates->fetch_assoc()) {
     $booked_dates[] = $row['tanggal_perjalanan'];
 }
+
 
 // Mendapatkan tanggal hari ini
 $current_date = date('Y-m-d');
@@ -126,15 +130,16 @@ $current_date = date('Y-m-d');
                         <label for="tanggal_perjalanan" class="form-label">Tanggal Perjalanan</label>
                         <input type="text" class="form-control" id="tanggal_perjalanan" name="tanggal_perjalanan" required>
                     </div>
-
+                    <div class="mb-3">
+                        <label for="catatan" class="form-label">Catatan</label>
+                        <textarea class="form-control" id="catatan" name="catatan" rows="3"></textarea>
+                    </div>
                     <div class="mb-3">
                         <label for="total_harga" class="form-label">Total Harga</label>
                         <p id="total_harga">Rp <?= number_format($paket['harga'], 2, ',', '.') ?></p>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Pesan Sekarang</button>
-
-                    <a href="custom_order.php?id_paket=<?= $id_paket ?>" class="btn btn-secondary ms-2">Pesan Paket Custom</a>
                 </form>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">
@@ -145,6 +150,24 @@ $current_date = date('Y-m-d');
 
         <div class="mt-4 text-center">
             <a href="dashboard.php" class="btn btn-secondary">Kembali ke Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Modal untuk peringatan -->
+    <div class="modal fade" id="tanggalModal" tabindex="-1" aria-labelledby="tanggalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tanggalModalLabel">Peringatan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tanggal perjalanan harus diisi sebelum melanjutkan pemesanan.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -175,10 +198,22 @@ $current_date = date('Y-m-d');
             minDate: "today", // Menonaktifkan tanggal yang sudah lewat
             disable: bookedDates, // Menonaktifkan tanggal yang sudah dipesan
             dateFormat: "Y-m-d", // Format tanggal
-            onClose: function(selectedDates, dateStr, instance) {
+            onChange: function(selectedDates, dateStr, instance) {
                 if (bookedDates.includes(dateStr)) {
                     alert("Tanggal ini sudah dipesan. Silakan pilih tanggal lain.");
+                    tanggalInput.clear(); // Menghapus tanggal yang dipilih
                 }
+            }
+        });
+
+        // Validasi sebelum mengirimkan formulir
+        document.getElementById('pesanForm').addEventListener('submit', function(event) {
+            const tanggalInput = document.getElementById('tanggal_perjalanan').value;
+            if (!tanggalInput) {
+                event.preventDefault(); // Mencegah pengiriman formulir
+                // Tampilkan modal
+                const modal = new bootstrap.Modal(document.getElementById('tanggalModal'));
+                modal.show();
             }
         });
     </script>

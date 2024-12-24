@@ -4,3 +4,6 @@
 4. generate tiket NUMBER 1
 5. notifikasi (WELL DONE)
 6. tambahin no telepon buat user (WELL DONE)
+7. benerin bug yang ada di bagian tanggal pemesanan (WELL DONE)
+8. tambahin fitur generate tiket (WELL DONE)
+9. tambahin fitur yang ngasih pesan ke email user yang mesen paket (WELL DONE)

@@ -2,12 +2,22 @@
 session_start();
 
 // Cek apakah pengguna sudah login
-if (!isset($_SESSION['user_id'])) { // Ganti 'user_id' dengan nama variabel sesi yang Anda gunakan
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.html"); // Arahkan ke halaman login jika belum login
     exit();
 }
 
+// Cek apakah pengguna adalah admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header("Location: ../unauthorized.html"); // Ganti dengan halaman yang sesuai
+    exit();
+}
+
+require '../vendor/autoload.php';
 require_once '../backend/koneksi.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -22,8 +32,11 @@ header("Expires: 0"); // Untuk semua
 $id_pesanan = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Ambil data pesanan berdasarkan ID
-$sql = "SELECT * FROM pesanan WHERE id_pesanan = '$id_pesanan'";
-$result = $conn->query($sql);
+$sql = "SELECT p.*, pk.nama_paket, u.email FROM pesanan p JOIN paket pk ON p.id_paket = pk.id_paket JOIN users u ON p.user_id = u.user_id WHERE p.id_pesanan = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_pesanan);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows == 0) {
     die("Pesanan tidak ditemukan.");
@@ -36,21 +49,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $status_pesanan = $_POST['status_pesanan'];
 
     // Update status pesanan
-    $update_sql = "UPDATE pesanan SET status_pesanan = '$status_pesanan' WHERE id_pesanan = '$id_pesanan'";
-    if ($conn->query($update_sql) === TRUE) {
-        // Kirim tiket ke email pengguna
-        $to = $row['email'];
-        $subject = "Tiket Pesanan Anda";
-        $message = "Terima kasih telah memesan. Berikut adalah detail pesanan Anda:\n\n" .
-                   "Nama Pemesan: " . $row['nama_pemesan'] . "\n" .
-                   "Nama Paket: " . $row['id_paket'] . "\n" . // Anda mungkin ingin mengganti ini dengan nama paket yang sesuai
-                   "Status Pesanan: " . $status_pesanan . "\n" .
-                   "Tanggal Pesan: " . $row['tanggal_pesan'] . "\n" .
-                   "Tanggal Perjalanan: " . $row['tanggal_perjalanan'] . "\n\n" .
-                   "Terima kasih!";
-        
-        // Kirim email
-        mail($to, $subject, $message);
+    $update_sql = "UPDATE pesanan SET status_pesanan = '$status_pesanan' WHERE id_pesanan = ?";
+    $stmt_update = $conn->prepare($update_sql);
+    $stmt_update->bind_param("i", $id_pesanan);
+    if ($stmt_update->execute()) {
+        echo "Status pesanan berhasil diperbarui menjadi $status_pesanan.";
+
+        // Jika status pesanan diubah menjadi "Dikonfirmasi", generate tiket dan kirim email
+        if ($status_pesanan === 'Dikonfirmasi') {
+            // Ambil informasi pesanan untuk menggenerate tiket
+            $user_id = $row['user_id'];
+            $nama_paket = $row['nama_paket']; // Ambil nama_paket dari hasil query
+            $tanggal_perjalanan = $row['tanggal_perjalanan'];
+            $jumlah_peserta = $row['jumlah_peserta'];
+            $email_user = $row['email']; // Ambil email pengguna
+
+            // Generate tiket
+            $kode_tiket_array = [];
+            for ($i = 0; $i < $jumlah_peserta; $i++) {
+                $kode_tiket = uniqid('TKT-'); // Generate kode tiket unik
+                $kode_tiket_array[] = $kode_tiket;
+
+                $sql_insert_tiket = "INSERT INTO tiket (id_pesanan, user_id, nama_paket, tanggal_perjalanan, jumlah_peserta, kode_tiket) VALUES (?, ?, ?, ?, ?, ?)";
+                $stmt_insert_tiket = $conn->prepare($sql_insert_tiket);
+                $stmt_insert_tiket->bind_param("iissis", $id_pesanan, $user_id, $nama_paket, $tanggal_perjalanan, $jumlah_peserta, $kode_tiket);
+                
+                if (!$stmt_insert_tiket->execute()) {
+                    echo "Gagal menyimpan data tiket: " . $stmt_insert_tiket->error;
+                }
+                $stmt_insert_tiket->close();
+            }
+
+            // Generate tiket PDF
+            $pdfPath = generateTicketPDF($kode_tiket_array, $nama_paket, $tanggal_perjalanan, $jumlah_peserta, $id_pesanan);
+
+            // Kirim email kepada pengguna
+            $mail = new PHPMailer(true);
+            try {
+                // Konfigurasi server
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com'; // Ganti dengan SMTP server Anda
+                $mail->SMTPAuth = true;
+                $mail->Username = 'tidakberkah6@gmail.com'; // Ganti dengan email Anda
+                $mail->Password = 'cvxn tsdh zdsp dzbm'; // Ganti dengan password email Anda
+                $mail->SMTPSecure = 'tls';
+                $mail->Port = 587;
+
+                // Pengaturan email
+                $mail->setFrom('tidakberkah6@gmail.com', 'adon');
+                $mail->addAddress($email_user);
+                $mail->Subject = 'Pesanan Dikonfirmasi';
+                $mail->Body = "Pesanan Anda untuk paket '$nama_paket' telah dikonfirmasi. Anda dapat mengunduh tiket Anda pada halaman Detail Pesanan: http://localhost/test/pemwebfp/user/detail_pesanan.php?id=$id_pesanan";
+                $mail->send();
+
+                echo "Email konfirmasi telah dikirim ke $email_user.";
+            } catch (Exception $e) {
+                echo "Pesan tidak dapat dikirim. Kesalahan Mailer: {$mail->ErrorInfo}";
+            }
+        }
 
         // Redirect ke halaman kelola pesanan dengan status sukses
         header("Location: kelola_pesanan.php");
@@ -106,3 +162,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+<?php
+// Fungsi untuk menghasilkan tiket PDF
+function generateTicketPDF($kode_tiket_array, $nama_paket, $tanggal_perjalanan, $jumlah_peserta, $id_pesanan) {
+    $pdf = new \TCPDF(); // Menggunakan namespace penuh
+    $pdf->SetCreator(PDF_CREATOR);
+    $pdf->SetAuthor('Zein Persada Utama');
+    $pdf->SetTitle('Tiket Pesanan');
+    $pdf->SetSubject('Detail Tiket');
+    $pdf->SetKeywords('TCPDF, PDF, tiket, pesanan');
+
+    // Set ukuran halaman A7 dalam orientasi horizontal
+    $width = 105; // Lebar dalam mm
+    $height = 74; // Tinggi dalam mm
+    $pdf->SetMargins(5, 5, 5); // Margin kiri, atas, kanan
+    $pdf->SetAutoPageBreak(TRUE, 5); // Aktifkan pemisahan halaman otomatis
+
+    foreach ($kode_tiket_array as $kode_tiket) {
+        $pdf->AddPage('L', [$width, $height]); // Tambahkan halaman baru dengan ukuran A7 horizontal
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->Cell(0, 10, 'Tiket Pesanan', 0, 1, 'C');
+        $pdf->Ln(5); // Tambahkan jarak
+
+        $pdf->SetFont('helvetica', '', 12);
+        $pdf->Cell(0, 10, 'ID Pemesanan: ' . $id_pesanan, 0, 1);
+        $pdf->Cell(0, 10, 'Kode Tiket: ' . $kode_tiket, 0, 1);
+        $pdf->Cell(0, 10, 'Nama Paket: ' . $nama_paket, 0, 1);
+        $pdf->Cell(0, 10, 'Tanggal Perjalanan: ' . $tanggal_perjalanan, 0, 1);
+        
+        // Tambahkan garis pemisah
+        $pdf->Ln(3); // Tambahkan jarak
+        $pdf->Cell(0, 0, '', 'T', 1, 'C'); // Garis horizontal
+        $pdf->Ln(3); // Tambahkan jarak
+    }
+    
+    // Pastikan folder ada dan dapat ditulis
+    $outputPath = __DIR__ . '/../uploads/tiket/tiket_' . $id_pesanan . '.pdf'; // Menggunakan path absolut
+    $pdf->Output($outputPath, 'F'); // Simpan PDF
+    echo "File tiket berhasil dibuat: " . $outputPath; // Tampilkan pesan bahwa file berhasil dibuat
+    return $outputPath;
+}
+?>

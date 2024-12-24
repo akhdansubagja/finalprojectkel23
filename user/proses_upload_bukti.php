@@ -1,4 +1,6 @@
 <?php
+require '../vendor/autoload.php'; // Sertakan autoloader Composer
+
 include '../backend/koneksi.php';
 include '../backend/notification.php'; // Pastikan untuk menyertakan file notifikasi
 session_start();
@@ -45,8 +47,8 @@ if (isset($_FILES['foto_transfer']) && $_FILES['foto_transfer']['error'] == 0) {
             // Simpan nama file ke dalam variabel
             $foto_transfer = time() . "_" . basename($_FILES["foto_transfer"]["name"]);
 
-            // Ambil nama pemesan dari tabel pesanan
-            $sql_nama = "SELECT nama_pemesan FROM pesanan WHERE id_pesanan = ?";
+            // Ambil nama pemesan dan nama paket dari tabel pesanan dan paket
+            $sql_nama = "SELECT p.*, pk.nama_paket FROM pesanan p JOIN paket pk ON p.id_paket = pk.id_paket WHERE p.id_pesanan = ?";
             $stmt_nama = $conn->prepare($sql_nama);
             $stmt_nama->bind_param("i", $id_pesanan);
             $stmt_nama->execute();
@@ -55,6 +57,10 @@ if (isset($_FILES['foto_transfer']) && $_FILES['foto_transfer']['error'] == 0) {
             if ($result_nama->num_rows > 0) {
                 $row_nama = $result_nama->fetch_assoc();
                 $nama_pemesan = $row_nama['nama_pemesan'];
+                $user_id = $row_nama['user_id']; // Ambil user_id
+                $nama_paket = $row_nama['nama_paket']; // Ambil nama paket
+                $tanggal_perjalanan = $row_nama['tanggal_perjalanan'];
+                $jumlah_peserta = $row_nama['jumlah_peserta'];
 
                 // Update foto_transfer dan status pembayaran di tabel pesanan
                 $sql_update = "UPDATE pesanan SET foto_transfer = ?, status_pembayaran = 'Sudah Dibayar' WHERE id_pesanan = ?";
@@ -67,6 +73,9 @@ if (isset($_FILES['foto_transfer']) && $_FILES['foto_transfer']['error'] == 0) {
                     $pesan_notifikasi = "$nama_pemesan telah melakukan pembayaran untuk ID pesanan: " . $id_pesanan;
                     addNotification($pesan_notifikasi, $id_pesanan); // Panggil fungsi notifikasi dengan variabel yang benar
 
+                    // Hapus bagian penggenerasian tiket
+                    // Simpan data tiket ke database sesuai dengan jumlah peserta
+                    // Kode penggenerasian tiket dihapus
                 } else {
                     echo "Gagal memperbarui data pesanan: " . $conn->error;
                 }
@@ -84,4 +93,6 @@ if (isset($_FILES['foto_transfer']) && $_FILES['foto_transfer']['error'] == 0) {
 }
 
 $conn->close();
+
+// Fungsi untuk menghasilkan tiket PDF dihapus dari sini
 ?>

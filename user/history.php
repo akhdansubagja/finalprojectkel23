@@ -8,6 +8,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Panggil fungsi untuk memperbarui status pesanan
+updateOrderStatus($conn);
+
 // Ambil data user dari session (misalnya ID pengguna)
 $user_id = $_SESSION['user_id']; // Pastikan session sudah menyimpan data ID pengguna
 

@@ -6,6 +6,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Cek apakah pengguna adalah admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') { // Menggunakan user_role
+    header("Location: ../unauthorized.html"); // Ganti dengan halaman yang sesuai
+    exit();
+}
+
 require_once '../backend/koneksi.php';
 
 if ($conn->connect_error) {

@@ -17,6 +17,7 @@ $nama_pemesan = $_POST['nama_pemesan'];
 $email = $_POST['email'];
 $jumlah_peserta = $_POST['jumlah_peserta'];
 $tanggal_perjalanan = $_POST['tanggal_perjalanan'];
+$catatan = $_POST['catatan'];
 
 // Ambil harga paket dari database
 $sql_harga = "SELECT harga FROM paket WHERE id_paket = ?";
@@ -36,10 +37,10 @@ if ($result_harga->num_rows > 0) {
     $masa_pembayaran = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
     // Masukkan data pesanan ke tabel pesanan
-    $sql_insert = "INSERT INTO pesanan (id_paket, user_id, nama_pemesan, email, jumlah_peserta, harga_total, tanggal_pesan, tanggal_perjalanan, masa_pembayaran) 
-                   VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
+    $sql_insert = "INSERT INTO pesanan (id_paket, user_id, nama_pemesan, email, jumlah_peserta, harga_total, tanggal_pesan, tanggal_perjalanan, masa_pembayaran, catatan) 
+                   VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)";
     $stmt_insert = $conn->prepare($sql_insert);
-    $stmt_insert->bind_param("iississs", $id_paket, $user_id, $nama_pemesan, $email, $jumlah_peserta, $harga_total, $tanggal_perjalanan, $masa_pembayaran);
+    $stmt_insert->bind_param("iississss", $id_paket, $user_id, $nama_pemesan, $email, $jumlah_peserta, $harga_total, $tanggal_perjalanan, $masa_pembayaran, $catatan);
     
     if ($stmt_insert->execute()) {
         // Ambil id_pesanan yang baru saja dimasukkan

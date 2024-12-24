@@ -18,12 +18,15 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
+// Panggil fungsi untuk memperbarui status pesanan
+updateOrderStatus($conn);
+
 // Ambil ID pesanan dari parameter URL
 $id_pesanan = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Query untuk mengambil detail pesanan
 $sql = "
-    SELECT p.id_pesanan AS id_pesanan, p.tanggal_pesan, pk.nama_paket, pk.tujuan, pk.durasi_hari, p.harga_total, p.tanggal_perjalanan, p.jumlah_peserta, p.nama_pemesan, p.email, p.foto_transfer, p.masa_pembayaran, p.status_pembayaran 
+    SELECT p.id_pesanan AS id_pesanan, p.tanggal_pesan, pk.nama_paket, pk.tujuan, pk.durasi_hari, p.harga_total, p.tanggal_perjalanan, p.jumlah_peserta, p.nama_pemesan, p.email, p.foto_transfer, p.masa_pembayaran, p.status_pembayaran, p.status_pesanan, p.catatan
     FROM pesanan p 
     JOIN paket pk ON p.id_paket = pk.id_paket 
     WHERE p.id_pesanan = ?
@@ -81,10 +84,9 @@ $row = $result->fetch_assoc();
 
             // Hentikan timer jika status pembayaran sudah dibayar
             if (statusPembayaran === 'Sudah Dibayar') {
-                document.getElementById('countdown').innerHTML = "Pembayaran sudah dilakukan.";
                 document.getElementById('uploadForm').style.display = 'none'; // Sembunyikan form upload
+                document.getElementById('waktuPembayaran').style.display = 'none'; // Sembunyikan waktu pembayaran
                 document.getElementById('bankList').style.display = 'none'; // Sembunyikan form pembayaran
-
             } else {
                 startCountdown(masaPembayaran);
             }
@@ -114,13 +116,15 @@ $row = $result->fetch_assoc();
                 <p><strong>Jumlah Peserta:</strong> <?= htmlspecialchars($row['jumlah_peserta']) ?></p>
                 <p><strong>Nama Pemesan:</strong> <?= htmlspecialchars($row['nama_pemesan']) ?></p>
                 <p><strong>Email:</strong> <?= htmlspecialchars($row['email']) ?></p>
-                <p><strong>Foto Transfer:</strong> 
+                <p><strong>Status Pembayaran:</strong> <?= htmlspecialchars($row['status_pembayaran']) ?></p>
+                <p><strong>Bukti Pembayaran:</strong> 
                     <?php if (!empty($row['foto_transfer'])): ?>
                         <img src="../uploads/bukti_pembayaran/<?= htmlspecialchars($row['foto_transfer']) ?>" alt="Foto Transfer" class="img-fluid" style="max-width: 300px;">
                     <?php else: ?>
                         Tidak ada foto transfer.
                     <?php endif; ?>
                 </p>
+                <p><strong>Catatan:</strong> <?= nl2br(htmlspecialchars($row['catatan'])) ?></p>
             </div>
         </div>
 
@@ -136,7 +140,7 @@ $row = $result->fetch_assoc();
         </div>
 
         <!-- Menampilkan Waktu Pembayaran Tersisa -->
-        <div class="mt-5">
+        <div class="mt-5" id="waktuPembayaran">
             <h3>Waktu Pembayaran Tersisa</h3>
             <p id="countdown" class="text-danger"></p>
         </div>
@@ -152,6 +156,15 @@ $row = $result->fetch_assoc();
                 </div>
                 <button type="submit" class="btn btn-primary">Unggah Bukti Pembayaran</button>
             </form>
+        </div>
+
+        <div class="mt-4">
+            <h3>Unduh Tiket PDF</h3>
+            <?php if ($row['status_pembayaran'] === 'Sudah Dibayar' && $row['status_pesanan'] === 'Dikonfirmasi'): ?>
+                <a href="download_tiket.php?id=<?= $id_pesanan ?>" class="btn btn-success">Unduh Tiket PDF</a>
+            <?php else: ?>
+                <p class="text-danger">Tiket PDF hanya dapat diunduh setelah pembayaran dikonfirmasi.</p>
+            <?php endif; ?>
         </div>
 
         <a href="history.php" class="btn btn-secondary mt-3">Kembali ke Riwayat Pesanan</a>

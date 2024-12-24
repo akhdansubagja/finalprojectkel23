@@ -13,6 +13,15 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Cek apakah pengguna adalah admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') { // Menggunakan user_role
+    header("Location: ../unauthorized.html"); // Ganti dengan halaman yang sesuai
+    exit();
+}
+
+// Panggil fungsi untuk memperbarui status pesanan
+updateOrderStatus($conn);
+
 // Ambil ID pemesanan dari parameter URL
 $id_pesanan = isset($_GET['id']) ? intval($_GET['id']) : 0;
 

@@ -7,6 +7,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Cek apakah pengguna adalah admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') { // Menggunakan user_role
+    header("Location: ../unauthorized.html"); // Ganti dengan halaman yang sesuai
+    exit();
+}
+
 // Ambil ID paket dari URL
 if (isset($_GET['id'])) {
     $id_paket = intval($_GET['id']); // Pastikan ID adalah angka

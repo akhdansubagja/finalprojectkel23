@@ -7,6 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Cek apakah pengguna adalah admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') { // Menggunakan user_role
+    header("Location: ../unauthorized.html"); // Ganti dengan halaman yang sesuai
+    exit();
+}
+
 require_once '../backend/koneksi.php';
 
 if ($conn->connect_error) {
@@ -19,22 +25,9 @@ header("Pragma: no-cache"); // Untuk HTTP 1.0
 header("Expires: 0"); // Untuk semua
 
 // Fungsi untuk memperbarui status pesanan
-function updateOrderStatus($conn) {
-    $sql = "
-        UPDATE pesanan 
-        SET status_pesanan = 'Dibatalkan' 
-        WHERE status_pesanan = 'Pending' AND masa_pembayaran < NOW() AND status_pembayaran = 'Belum Dibayar'
-    ";
-
-    if ($conn->query($sql) === TRUE) {
-        // return "Status pesanan berhasil diperbarui.";
-    } else {
-        return "Error updating record: " . $conn->error;
-    }
-}
 
 // Panggil fungsi untuk memperbarui status pesanan
-$message = updateOrderStatus($conn);
+updateOrderStatus($conn);
 
 // Ambil status pemesanan dari parameter URL jika ada
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'semua';
